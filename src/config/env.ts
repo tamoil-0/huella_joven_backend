@@ -3,6 +3,16 @@ import { z } from 'zod';
 
 dotenv.config();
 
+const rawEnv = {
+  ...process.env,
+  DATABASE_URL: process.env.DATABASE_URL ?? process.env.POSTGRES_URL,
+  JWT_SECRET:
+    process.env.JWT_SECRET ??
+    (process.env.NODE_ENV === 'production'
+      ? undefined
+      : 'huella-joven-local-development-secret')
+};
+
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(16),
@@ -12,4 +22,4 @@ const envSchema = z.object({
   NODE_ENV: z.string().default('development')
 });
 
-export const env = envSchema.parse(process.env);
+export const env = envSchema.parse(rawEnv);
