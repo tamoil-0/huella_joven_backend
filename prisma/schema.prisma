@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  joven
+  validador
+  organizacion
+  admin
+}
+
+enum ActivityRubro {
+  ambiente
+  educacion
+  ciudadania
+  digital
+  salud
+  cultura
+}
+
+enum ActivityStatus {
+  borrador
+  pendiente
+  enviada
+  validada
+  observada
+  rechazada
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  name               String
+  email              String              @unique
+  passwordHash       String
+  district           String
+  type               UserType            @default(joven)
+  diagnosticDone     Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  activities         Activity[]          @relation("UserActivities")
+  validations        ActivityValidation[] @relation("ValidatorValidations")
+  enrollments        OpportunityEnrollment[]
+  groupMemberships   GroupMember[]
+  groupMessages      GroupMessage[]
+  notifications      Notification[]
+  createdOpportunities Opportunity[]     @relation("OpportunityCreator")
+
+  @@map("users")
+}
+
+model Activity {
+  id              String               @id @default(cuid())
+  userId          String
+  title           String
+  description     String
+  date            DateTime
+  location        String
+  rubro           ActivityRubro
+  hours           Int
+  beneficiaries   Int
+  role            String
+  validator       String
+  reflection      String
+  status          ActivityStatus       @default(pendiente)
+  evidence        String[]             @default([])
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  user            User                 @relation("UserActivities", fields: [userId], references: [id], onDelete: Cascade)
+  validations     ActivityValidation[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("activities")
+}
+
+model ActivityValidation {
+  id          String          @id @default(cuid())
+  activityId  String
+  validatorId String
+  status      ActivityStatus
+  comment     String?
+  createdAt   DateTime        @default(now())
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  validator   User            @relation("ValidatorValidations", fields: [validatorId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+  @@index([validatorId])
+  @@map("activity_validations")
+}
+
+model Opportunity {
+  id          String                  @id @default(cuid())
+  creatorId   String?
+  title       String
+  organizer   String
+  place       String
+  rubro       ActivityRubro
+  date        DateTime
+  spots       Int
+  taken       Int                     @default(0)
+  description String
+  roles       String[]                @default([])
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  creator     User?                   @relation("OpportunityCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+  enrollments OpportunityEnrollment[]
+
+  @@index([rubro])
+  @@map("opportunities")
+}
+
+model OpportunityEnrollment {
+  id            String      @id @default(cuid())
+  opportunityId String
+  userId        String
+  role          String?
+  createdAt     DateTime    @default(now())
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, userId])
+  @@index([userId])
+  @@map("opportunity_enrollments")
+}
+
+model YouthGroup {
+  id          String        @id @default(cuid())
+  name        String
+  district    String
+  purpose     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  members     GroupMember[]
+  messages    GroupMessage[]
+
+  @@map("youth_groups")
+}
+
+model GroupMember {
+  id        String     @id @default(cuid())
+  groupId   String
+  userId    String
+  createdAt DateTime   @default(now())
+  group     YouthGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+model GroupMessage {
+  id        String     @id @default(cuid())
+  groupId   String
+  userId    String
+  body      String
+  createdAt DateTime   @default(now())
+  group     YouthGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@map("group_messages")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  unread    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
