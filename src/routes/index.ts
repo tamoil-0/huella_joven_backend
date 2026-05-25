@@ -12,7 +12,11 @@ apiRoutes.get('/health', (_req, res) => {
   res.json({
     ok: true,
     name: 'Huella Joven API',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    env: {
+      database: Boolean(process.env.DATABASE_URL ?? process.env.POSTGRES_URL),
+      jwt: Boolean(process.env.JWT_SECRET)
+    }
   });
 });
 

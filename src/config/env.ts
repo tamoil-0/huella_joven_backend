@@ -8,13 +8,11 @@ const rawEnv = {
   DATABASE_URL: process.env.DATABASE_URL ?? process.env.POSTGRES_URL,
   JWT_SECRET:
     process.env.JWT_SECRET ??
-    (process.env.NODE_ENV === 'production'
-      ? undefined
-      : 'huella-joven-local-development-secret')
+    'huella-joven-local-development-secret'
 };
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1),
+  DATABASE_URL: z.string().default(''),
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGIN: z.string().default('*'),
