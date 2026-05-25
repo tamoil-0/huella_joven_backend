@@ -39,6 +39,7 @@ GET /api/health
 ```txt
 DATABASE_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
 DATABASE_URL_UNPOOLED=postgresql://USER:PASSWORD@HOST_UNPOOLED/DATABASE?sslmode=require
+POSTGRES_PRISMA_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require&pgbouncer=true&connect_timeout=15
 JWT_SECRET=un-secreto-largo-y-privado
 JWT_EXPIRES_IN=7d
 CORS_ORIGIN=*
