@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import type serverless from 'serverless-http';
+import { handleFastApi } from './fast-api';
 
 type ServerlessHandler = ReturnType<typeof serverless>;
 
@@ -27,6 +28,10 @@ export default async function vercelHandler(
 ) {
   if (req.url?.startsWith('/api/health')) {
     sendHealth(res);
+    return;
+  }
+
+  if (await handleFastApi(req, res)) {
     return;
   }
 

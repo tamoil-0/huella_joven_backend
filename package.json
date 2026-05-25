@@ -24,6 +24,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@prisma/client": "^6.8.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
